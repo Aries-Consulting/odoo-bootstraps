@@ -42,7 +42,7 @@ Each module can then be managed individually.
 - `web_m2x_options` - Dropdown control
 - `web_environment_ribbon` - Environment indicator
 - `web_notify` - Notifications
-- `mass_editing` - Bulk edit
+- `server_action_mass_edit` - Bulk edit
 
 **Reports:**
 - `report_xlsx` - Excel export

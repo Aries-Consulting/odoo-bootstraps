@@ -18,7 +18,7 @@
         - web_m2x_options: Control dropdowns (disable create, limit results)
         - web_environment_ribbon: Visual DEV/STAGING/PROD indicator
         - web_notify: Server-to-client notifications
-        - mass_editing: Bulk edit multiple records
+        - server_action_mass_edit: Bulk edit multiple records
 
         **Reports:**
         - report_xlsx: Export any report to Excel
@@ -48,7 +48,7 @@
         'web_m2x_options',             # OCA/web - Dropdown control
         'web_environment_ribbon',      # OCA/web - DEV/STAGING/PROD ribbon
         'web_notify',                  # OCA/web - Server notifications
-        'mass_editing',                # OCA/server-ux - Bulk edit
+        'server_action_mass_edit',                # OCA/server-ux - Bulk edit
         # Reports
         'report_xlsx',                 # OCA/reporting-engine - Excel export
         # Maintenance
