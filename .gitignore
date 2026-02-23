@@ -1,0 +1,29 @@
+# Framework infrastructure (NEVER commit to client repo)
+.planning/
+reference/
+templates/
+.mcp.json
+CLAUDE.md
+.claude/
+.framework-version
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
