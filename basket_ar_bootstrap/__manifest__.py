@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Basket AR Bootstrap',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.1.0',
     'category': 'Technical',
     'summary': 'Installs all Basket AR modules (Universal + Argentina = 28 modules)',
     'description': """
@@ -9,7 +9,7 @@
 
         Installing this single module will install all 28 modules:
 
-        **UNIVERSAL BASKET (9 modules):**
+        **UNIVERSAL BASKET (8 modules):**
 
         Security/Compliance:
         - auditlog: Audit trail for create/write/unlink operations
@@ -18,7 +18,6 @@
 
         UX/Productivity:
         - web_m2x_options: Control dropdowns (disable create, limit results)
-        - web_environment_ribbon: Visual DEV/STAGING/PROD indicator
         - web_notify: Server-to-client notifications
         - server_action_mass_edit: Bulk edit multiple records
 
@@ -28,7 +27,7 @@
         Maintenance:
         - database_cleanup: Remove orphaned DB artifacts
 
-        **AR BASKET (19 modules):**
+        **AR BASKET (20 modules):**
 
         Payments:
         - account_payment_pro: Grouped payments with multiple methods
@@ -53,6 +52,9 @@
         - product_ux: Product UX improvements
         - base_ux: Base UX improvements
 
+        Reports:
+        - account_journal_book_report: Legal journal book (Libro Diario)
+
         OCA Dependencies:
         - currency_rate_live: Exchange rate framework
         - stock_picking_invoice_link: Link pickings to invoices
@@ -67,7 +69,7 @@
     'license': 'LGPL-3',
     'depends': [
         # ==========================================
-        # UNIVERSAL BASKET (9 modules)
+        # UNIVERSAL BASKET (8 modules)
         # ==========================================
         # Security/Compliance
         'auditlog',                    # OCA/server-tools - Audit trail
@@ -75,16 +77,15 @@
         'auth_session_timeout',        # OCA/server-auth - Session timeout
         # UX/Productivity
         'web_m2x_options',             # OCA/web - Dropdown control
-        'web_environment_ribbon',      # OCA/web - DEV/STAGING/PROD ribbon
         'web_notify',                  # OCA/web - Server notifications
-        'server_action_mass_edit',                # OCA/server-ux - Bulk edit
+        'server_action_mass_edit',     # OCA/server-ux - Bulk edit
         # Reports
         'report_xlsx',                 # OCA/reporting-engine - Excel export
         # Maintenance
         'database_cleanup',            # OCA/server-tools - DB cleanup
 
         # ==========================================
-        # AR BASKET (19 modules)
+        # AR BASKET (20 modules)
         # ==========================================
         # Payments
         'account_payment_pro',              # ingadhoc/account-payment
@@ -106,6 +107,8 @@
         'stock_no_negative',           # ingadhoc/stock
         'product_ux',                  # ingadhoc/product
         'base_ux',                     # ingadhoc/miscellaneous
+        # Reports
+        'account_journal_book_report', # ingadhoc/odoo-argentina-ee - Legal journal book (Libro Diario)
         # OCA Dependencies
         'currency_rate_live',          # OCA/currency
         'stock_picking_invoice_link',  # OCA/stock-logistics-workflow

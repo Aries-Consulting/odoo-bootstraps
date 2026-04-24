@@ -6,8 +6,8 @@ Bootstrap modules for Odoo 18 projects. One-click installation of curated module
 
 | Module | Modules | For |
 |--------|---------|-----|
-| `basket_universal_bootstrap` | 9 | Any country |
-| `basket_ar_bootstrap` | 28 | Argentina (includes Universal) |
+| `basket_universal_bootstrap` | 5 | Any country |
+| `basket_ar_bootstrap` | 28 + 3 recommended Aries | Argentina (includes Universal) |
 
 ## Usage
 
@@ -31,32 +31,29 @@ Each module can then be managed individually.
 
 ## Basket Contents
 
-### Universal (9 modules)
-
-**Security/Compliance:**
-- `auditlog` - Audit trail
-- `password_security` - Password policies
-- `auth_session_timeout` - Session timeout
+### Universal (5 modules)
 
 **UX/Productivity:**
 - `web_m2x_options` - Dropdown control
-- `web_environment_ribbon` - Environment indicator
 - `web_notify` - Notifications
-- `server_action_mass_edit` - Bulk edit
+- `web_responsive` - Mobile-friendly backend
 
 **Reports:**
 - `report_xlsx` - Excel export
 
-**Maintenance:**
-- `database_cleanup` - DB cleanup
+**Optional (install manually if needed):**
+- `auditlog` - Audit trail (compliance requirement)
+- `database_cleanup` - DB cleanup (use with caution)
 
-### AR (19 additional modules)
+### AR (28 modules: 8 Universal + 20 AR)
 
-**Payments:**
+**Auto-installed (28 modules):**
+
+Payments:
 - `account_payment_pro` - Grouped payments
 - `account_payment_pro_receiptbook` - Receipt books
 
-**Core AR:**
+Core AR:
 - `l10n_ar_ux` - Base AR UX
 - `l10n_ar_tax` - Perceptions/retentions
 - `l10n_ar_bank` - AR banks
@@ -64,13 +61,21 @@ Each module can then be managed individually.
 - `l10n_ar_currency_update` - AFIP exchange rates
 - `l10n_ar_account_reports` - AR financial reports
 
-**UX (Ingadhoc):**
+UX (Ingadhoc):
 - `account_ux`, `account_internal_transfer`, `account_accountant_ux`
 - `sale_ux`, `purchase_ux`, `stock_ux`, `stock_no_negative`
 - `product_ux`, `base_ux`
 
-**OCA:**
+Reports:
+- `account_journal_book_report` - Legal journal book (Libro Diario)
+
+OCA:
 - `currency_rate_live`, `stock_picking_invoice_link`
+
+**Recommended Aries modules (install manually):**
+- `aries_afip_padron_ux` - Robust AFIP padron batch update
+- `l10n_ar_invoice_cancel` - Restrict electronic invoice cancellation
+- `l10n_ar_ux_fix_report_invoice_vat` - Fix CUIT/VAT display in PDFs
 
 ## Required Submodules
 
@@ -79,10 +84,8 @@ For the bootstraps to work, your project needs these repos as submodules:
 ### Universal
 
 ```bash
-git submodule add -b 18.0 https://github.com/OCA/server-tools.git oca/server-tools
-git submodule add -b 18.0 https://github.com/OCA/server-auth.git oca/server-auth
+git submodule add -b 18.0 https://github.com/OCA/server-tools.git oca/server-tools  # optional modules
 git submodule add -b 18.0 https://github.com/OCA/web.git oca/web
-git submodule add -b 18.0 https://github.com/OCA/server-ux.git oca/server-ux
 git submodule add -b 18.0 https://github.com/OCA/reporting-engine.git oca/reporting-engine
 ```
 
@@ -101,6 +104,7 @@ git submodule add -b 18.0 https://github.com/ingadhoc/product.git adhoc/product
 git submodule add -b 18.0 https://github.com/ingadhoc/miscellaneous.git adhoc/miscellaneous
 git submodule add -b 18.0 https://github.com/OCA/currency.git oca/currency
 git submodule add -b 18.0 https://github.com/OCA/stock-logistics-workflow.git oca/stock-logistics-workflow
+git submodule add -b 18.0 https://github.com/ingadhoc/aeroo_reports.git adhoc/aeroo_reports
 ```
 
 ## License
