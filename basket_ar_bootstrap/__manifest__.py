@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Basket AR Bootstrap',
-    'version': '18.0.1.1.0',
+    'version': '18.0.1.2.0',
     'category': 'Technical',
     'summary': 'Installs all Basket AR modules (Universal + Argentina = 28 modules)',
     'description': """
@@ -68,6 +68,10 @@
     'website': 'https://github.com/Aries-Consulting/odoo-bootstraps',
     'license': 'LGPL-3',
     'depends': [
+        # ==========================================
+        # LANGUAGE SAFETY (1 module)
+        # ==========================================
+        'aries_lang_safety',           # Activates es_AR, sanitizes session lang
         # ==========================================
         # UNIVERSAL BASKET (8 modules)
         # ==========================================
