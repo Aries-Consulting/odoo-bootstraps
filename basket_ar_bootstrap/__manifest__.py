@@ -1,31 +1,33 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Basket AR Bootstrap',
-    'version': '18.0.1.2.0',
+    'version': '18.0.2.0.0',
     'category': 'Technical',
-    'summary': 'Installs all Basket AR modules (Universal + Argentina = 28 modules)',
+    'summary': 'Installs all Basket AR modules (Universal + Argentina = 26 modules)',
     'description': """
         Bootstrap module for Argentine Odoo 18 projects.
 
-        Installing this single module will install all 28 modules:
+        Installing this single module will install all 26 modules:
 
-        **UNIVERSAL BASKET (8 modules):**
+        **UNIVERSAL BASKET (6 modules):**
 
         Security/Compliance:
         - auditlog: Audit trail for create/write/unlink operations
         - password_security: Password policies (length, complexity, expiration)
-        - auth_session_timeout: Auto-logout after inactivity
 
         UX/Productivity:
         - web_m2x_options: Control dropdowns (disable create, limit results)
         - web_notify: Server-to-client notifications
-        - server_action_mass_edit: Bulk edit multiple records
 
         Reports:
         - report_xlsx: Export any report to Excel
 
         Maintenance:
         - database_cleanup: Remove orphaned DB artifacts
+
+        **Recommended (install on demand, not bundled):**
+        - auth_session_timeout (OCA/server-auth): Auto-logout after inactivity
+        - server_action_mass_edit (OCA/server-ux): Bulk edit multiple records
 
         **AR BASKET (20 modules):**
 
@@ -62,7 +64,7 @@
         **Usage:**
         Install this module once during project setup.
         After installation, you can uninstall this bootstrap module -
-        the 28 modules will remain installed and can be managed individually.
+        the 26 modules will remain installed and can be managed individually.
     """,
     'author': 'Aries Consulting',
     'website': 'https://github.com/Aries-Consulting/odoo-bootstraps',
@@ -73,16 +75,14 @@
         # ==========================================
         'aries_lang_safety',           # Activates es_AR, sanitizes session lang
         # ==========================================
-        # UNIVERSAL BASKET (8 modules)
+        # UNIVERSAL BASKET (6 modules)
         # ==========================================
         # Security/Compliance
         'auditlog',                    # OCA/server-tools - Audit trail
         'password_security',           # OCA/server-auth - Password policies
-        'auth_session_timeout',        # OCA/server-auth - Session timeout
         # UX/Productivity
         'web_m2x_options',             # OCA/web - Dropdown control
         'web_notify',                  # OCA/web - Server notifications
-        'server_action_mass_edit',     # OCA/server-ux - Bulk edit
         # Reports
         'report_xlsx',                 # OCA/reporting-engine - Excel export
         # Maintenance
