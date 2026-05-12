@@ -1,43 +1,53 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Aries Language Safety (es_AR)',
-    'version': '18.0.1.0.2',
+    'name': 'Aries Language Safety',
+    'version': '18.0.2.0.0',
     'category': 'Technical',
-    'summary': 'Activates es_AR and protects against browser locale mismatches',
+    'summary': 'Prevents Invalid language code 400 errors from browser locale mismatches',
     'description': """
-        Language safety for Argentine Odoo deployments.
+        Minimal language safety for Odoo 18 deployments.
 
         Problem this solves:
         Odoo 18 sets `session.context['lang']` from the browser's
         Accept-Language header (via babel) without validating that the
-        language is actually installed in the database. Argentine clients
-        whose browsers send `es-ES` (or just `es`, which babel aliases to
-        `es_ES`) hit `Invalid language code: es_ES` HTTP 400 errors when
-        accessing /odoo, because neither `l10n_ar` nor any AR module
-        activates `es_AR` automatically.
+        language is installed in the database. Browsers sending `es-ES`
+        (or just `es`, which babel aliases to `es_ES`) crash `/odoo`
+        with `Invalid language code: es_ES` HTTP 400 when neither
+        `es_ES` nor a fallback es_* variant is active.
 
         What this module does:
-        1. Activates `es_AR` (and only `es_AR`) as the working Spanish.
-        2. Updates admin user, root user and the company partner to use
-           `es_AR` so cached `res.users.context_get` resolves to a valid
-           lang.
-        3. Migrates any existing user / partner whose `lang` points to an
-           inactive language code (typically `es_ES` from a sanitized
-           production copy) to `es_AR`.
-        4. Deactivates `es_ES` if active and unused, so the database stays
-           single-language.
-        5. Overrides `ir.http._pre_dispatch` to silently rewrite any
-           browser-provided session lang that is not active in the
-           database to `es_AR` (or `en_US` as ultimate fallback). This
-           protects against any future locale mismatch (es-ES, es-419,
-           de-DE, etc.) without forcing those languages to be installed.
+        Overrides `ir.http._pre_dispatch` to silently rewrite any
+        browser-provided session lang that is not active in the database
+        to `es_AR`, then `en_US`, then any active language as ultimate
+        fallback. The override runs on every request so the protection
+        survives session resets and worker restarts.
+
+        What this module deliberately does NOT do:
+        - Does NOT activate any language. Use Settings > Translations
+          to add languages — this triggers Odoo's standard `toggle_active`
+          which loads .po translations correctly.
+        - Does NOT migrate users or partners. Existing data is untouched.
+        - Does NOT deactivate any language. The override handles invalid
+          requests at runtime; you do not need to deactivate `es_ES`.
+        - Does NOT load translations. Use Settings > Translations >
+          Reload Translations or activate the lang via UI.
+
+        Migration from v1.x:
+        Earlier versions had a heavy post-install hook that activated
+        es_AR, migrated users and deactivated es_ES. That hook caused
+        translation loading inconsistencies and was removed in v2.0.0.
+        If you upgraded from v1.x and are seeing partially translated
+        UI, run from `odoo-bin shell`:
+
+            mods = env['ir.module.module'].search([('state', '=', 'installed')])
+            mods._update_translations(['es_AR'])
+            env.cr.commit()
     """,
     'author': 'Aries Consulting',
     'website': 'https://github.com/Aries-Consulting/odoo-bootstraps',
     'license': 'LGPL-3',
     'depends': ['base'],
     'data': [],
-    'post_init_hook': 'post_init_hook',
     'installable': True,
     'auto_install': False,
     'application': False,
