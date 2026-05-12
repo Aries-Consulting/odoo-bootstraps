@@ -12,6 +12,6 @@ from odoo import api, SUPERUSER_ID
 from odoo.addons.aries_lang_safety.hooks import _apply_lang_safety
 
 
-def migrate(cr, installed_version):
+def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
     _apply_lang_safety(env)
