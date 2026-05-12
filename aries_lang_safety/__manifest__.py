@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Aries Language Safety (es_AR)',
-    'version': '18.0.1.0.1',
+    'version': '18.0.1.0.2',
     'category': 'Technical',
     'summary': 'Activates es_AR and protects against browser locale mismatches',
     'description': """
