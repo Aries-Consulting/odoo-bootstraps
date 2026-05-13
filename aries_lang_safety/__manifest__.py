@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Aries Language Safety',
-    'version': '18.0.2.0.1',
+    'version': '18.0.2.0.2',
     'category': 'Technical',
     'summary': 'Prevents Invalid language code 400 errors from browser locale mismatches',
     'description': """
