@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Aries Language Safety',
-    'version': '18.0.2.0.0',
+    'version': '18.0.2.0.1',
     'category': 'Technical',
     'summary': 'Prevents Invalid language code 400 errors from browser locale mismatches',
     'description': """
@@ -16,11 +16,19 @@
         `es_ES` nor a fallback es_* variant is active.
 
         What this module does:
-        Overrides `ir.http._pre_dispatch` to silently rewrite any
-        browser-provided session lang that is not active in the database
-        to `es_AR`, then `en_US`, then any active language as ultimate
-        fallback. The override runs on every request so the protection
-        survives session resets and worker restarts.
+        Two layers of defense, both running on every request:
+
+        1. Monkey-patches `Request._get_session_and_dbname` (loaded at
+           module import) to sanitize `session.context['lang']` BEFORE
+           any ir.http override or env access. This is the primary line
+           of defense: it runs at the earliest possible point in the
+           request lifecycle, independent of MRO order.
+
+        2. Overrides `ir.http._pre_dispatch` as a secondary defense in
+           case the monkey-patch is bypassed by an unusual code path.
+
+        Both layers rewrite an invalid lang to `es_AR`, then `en_US`,
+        then any active language as ultimate fallback.
 
         What this module deliberately does NOT do:
         - Does NOT activate any language. Use Settings > Translations
