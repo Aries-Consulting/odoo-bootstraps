@@ -1,32 +1,46 @@
 # -*- coding: utf-8 -*-
+"""
+Aries Language Safety — minimal v3.0.0
+
+Single intervention: replace `Environment.lang` to return a fallback
+instead of raising `UserError` when `context.lang` is not active in
+`res_lang`.
+
+Why this is the only patch we need:
+
+The original `Environment.lang` at `odoo/api.py:765` raises
+`UserError(f'Invalid language code: {lang}')`. Odoo's HTTP dispatcher
+catches that UserError and converts it to a `BadRequest` 400 response.
+Every code path that produces the `Invalid language code: es_ES` 400
+ends at this single property access. Patching this property is the
+only intervention guaranteed to run regardless of where in the request
+lifecycle a bad lang was injected — which previously included odoo.sh
+"Connect" flows that bypassed session-level and `_pre_dispatch`-level
+defenses.
+
+Earlier versions tried multiple defensive layers (a session sanitizer
+on `Request._get_session_and_dbname`, an `ir.http._pre_dispatch`
+override, post_init hooks that activated `es_AR` and migrated users).
+All of them were positional — they could be bypassed by specific code
+paths. This patch is at the actual raise site.
+
+Risk:
+Any Odoo code that depends on `env.lang` raising `UserError` for an
+invalid lang code (instead of falling back) would no longer detect
+the misconfiguration. In production this is exactly the behavior we
+want — the misconfiguration was the symptom, not a state we need to
+surface.
+
+Fallback priority: `es_AR`, then `en_US`, then any other active lang,
+then `None`.
+"""
 import logging
 
-import odoo.modules.registry
 from odoo.api import Environment
-from odoo.http import Request
 from odoo.tools import lazy_property
-
-from . import models
 
 _logger = logging.getLogger(__name__)
 
-
-# ---------------------------------------------------------------------
-# Three layers of defense, all loaded at module import:
-#
-# Layer 1 (this file): monkey-patch Request._get_session_and_dbname to
-#   sanitize session.context['lang'] right after session load.
-# Layer 2 (this file): monkey-patch Environment.lang to return a
-#   graceful fallback instead of raising UserError when context.lang
-#   is not active in res_lang. THIS is the bulletproof layer — it
-#   intercepts the actual error site, regardless of where the bad
-#   lang came from in the request lifecycle.
-# Layer 3 (models/ir_http.py): override _pre_dispatch in the MRO chain
-#   for sessions that bypass layer 1.
-#
-# Layer 2 is the one that should always work because it patches the
-# exact property that raises the UserError that becomes the 400.
-# ---------------------------------------------------------------------
 
 _FALLBACK_SQL = """
     SELECT code FROM res_lang
@@ -40,99 +54,39 @@ _FALLBACK_SQL = """
 """
 
 
-# =====================================================================
-# Layer 1: sanitize session.context['lang'] at session load time
-# =====================================================================
+def lang(self):
+    """Replacement for Environment.lang — see module docstring.
 
-_original_get_session_and_dbname = Request._get_session_and_dbname
-
-
-def _patched_get_session_and_dbname(self):
-    session, dbname = _original_get_session_and_dbname(self)
-    sess_lang = session.context.get('lang') if session else None
-    if not (dbname and sess_lang):
-        return session, dbname
-    try:
-        registry = odoo.modules.registry.Registry(dbname)
-        with registry.cursor() as cr:
-            cr.execute(
-                "SELECT 1 FROM res_lang WHERE active AND code = %s",
-                (sess_lang,),
-            )
-            if cr.fetchone():
-                return session, dbname
-            cr.execute(_FALLBACK_SQL)
-            row = cr.fetchone()
-            if not row:
-                return session, dbname
-            fallback = row[0]
-        session.context = dict(session.context, lang=fallback)
-        session.is_dirty = True
-        _logger.info(
-            "aries_lang_safety: rewrote session lang %r → %r for db %s",
-            sess_lang, fallback, dbname,
-        )
-    except Exception:
-        _logger.exception(
-            "aries_lang_safety: session lang sanitization failed (db=%s, "
-            "sess_lang=%r)",
-            dbname, sess_lang,
-        )
-    return session, dbname
-
-
-Request._get_session_and_dbname = _patched_get_session_and_dbname
-_logger.info("aries_lang_safety: Request._get_session_and_dbname patched")
-
-
-# =====================================================================
-# Layer 2: replace Environment.lang property — never raise on invalid
-# =====================================================================
-
-@lazy_property
-def _safe_env_lang(self):
-    """Replacement for Environment.lang.
-
-    Original (odoo/api.py:765-774):
-        @lazy_property
-        def lang(self):
-            lang = self.context.get('lang')
-            if lang and lang != 'en_US' and not self['res.lang']._get_data(code=lang):
-                raise UserError(f'Invalid language code: {lang}')
-            return lang or None
-
-    Replacement: when context.lang is not active in res_lang, fall back
-    to the first active lang (preferring es_AR, then en_US) instead of
-    raising. The UserError that becomes HTTP 400 is bypassed at its
-    source.
+    Named `lang` (not e.g. `_safe_env_lang`) so `lazy_property` caches
+    the result under the correct attribute name on the env instance.
     """
-    lang = self.context.get('lang')
-    if not lang or lang == 'en_US':
-        return lang or None
+    requested = self.context.get('lang')
+    if not requested or requested == 'en_US':
+        return requested or None
     try:
         cr = self.cr
         cr.execute(
             "SELECT 1 FROM res_lang WHERE active AND code = %s",
-            (lang,),
+            (requested,),
         )
         if cr.fetchone():
-            return lang
+            return requested
         cr.execute(_FALLBACK_SQL)
         row = cr.fetchone()
         if row:
             _logger.debug(
                 "aries_lang_safety: env.lang fallback %r → %r",
-                lang, row[0],
+                requested, row[0],
             )
             return row[0]
         return None
     except Exception:
         _logger.exception(
             "aries_lang_safety: env.lang fallback failed for lang=%r",
-            lang,
+            requested,
         )
-        return lang or None
+        return requested or None
 
 
-Environment.lang = _safe_env_lang
-_logger.info("aries_lang_safety: Environment.lang patched (graceful fallback)")
+Environment.lang = lazy_property(lang)
+_logger.info("aries_lang_safety v3.0.0: Environment.lang patched")

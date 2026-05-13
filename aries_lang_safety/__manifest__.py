@@ -1,55 +1,47 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Aries Language Safety',
-    'version': '18.0.2.0.2',
+    'version': '18.0.3.0.0',
     'category': 'Technical',
-    'summary': 'Prevents Invalid language code 400 errors from browser locale mismatches',
+    'summary': 'Prevents Invalid language code 400 errors at the raise site',
     'description': """
         Minimal language safety for Odoo 18 deployments.
 
         Problem this solves:
-        Odoo 18 sets `session.context['lang']` from the browser's
-        Accept-Language header (via babel) without validating that the
-        language is installed in the database. Browsers sending `es-ES`
-        (or just `es`, which babel aliases to `es_ES`) crash `/odoo`
-        with `Invalid language code: es_ES` HTTP 400 when neither
-        `es_ES` nor a fallback es_* variant is active.
+        Odoo 18 raises `UserError(f'Invalid language code: {lang}')` from
+        `Environment.lang` (odoo/api.py:765) whenever `context.lang` is
+        set to a code not active in `res_lang`. The HTTP dispatcher
+        converts that UserError to a `BadRequest` 400 — observed when
+        browsers send `Accept-Language: es-ES` and the database does
+        not have `es_ES` active. The bad lang code can be injected into
+        `context.lang` from multiple sources (session defaults, URL
+        params, cookies, odoo.sh platform middleware), so positional
+        defenses (session sanitizers, _pre_dispatch overrides) are not
+        reliable.
 
         What this module does:
-        Two layers of defense, both running on every request:
-
-        1. Monkey-patches `Request._get_session_and_dbname` (loaded at
-           module import) to sanitize `session.context['lang']` BEFORE
-           any ir.http override or env access. This is the primary line
-           of defense: it runs at the earliest possible point in the
-           request lifecycle, independent of MRO order.
-
-        2. Overrides `ir.http._pre_dispatch` as a secondary defense in
-           case the monkey-patch is bypassed by an unusual code path.
-
-        Both layers rewrite an invalid lang to `es_AR`, then `en_US`,
-        then any active language as ultimate fallback.
+        Replaces `Environment.lang` with a version that falls back to
+        the first active lang (preferring `es_AR`, then `en_US`) when
+        the requested lang is not active, instead of raising. This is
+        the single point at which every code path that produces the
+        400 converges, so patching it definitively prevents the error
+        regardless of where the bad lang came from.
 
         What this module deliberately does NOT do:
-        - Does NOT activate any language. Use Settings > Translations
-          to add languages — this triggers Odoo's standard `toggle_active`
-          which loads .po translations correctly.
-        - Does NOT migrate users or partners. Existing data is untouched.
-        - Does NOT deactivate any language. The override handles invalid
-          requests at runtime; you do not need to deactivate `es_ES`.
-        - Does NOT load translations. Use Settings > Translations >
-          Reload Translations or activate the lang via UI.
+        - Does NOT activate any language
+        - Does NOT migrate users or partners
+        - Does NOT deactivate any language
+        - Does NOT load translations
+        - Does NOT override any model
 
-        Migration from v1.x:
-        Earlier versions had a heavy post-install hook that activated
-        es_AR, migrated users and deactivated es_ES. That hook caused
-        translation loading inconsistencies and was removed in v2.0.0.
-        If you upgraded from v1.x and are seeing partially translated
-        UI, run from `odoo-bin shell`:
+        Configuration of installed languages, user lang preferences and
+        translation reloading remains the user's responsibility via
+        Settings > Translations.
 
-            mods = env['ir.module.module'].search([('state', '=', 'installed')])
-            mods._update_translations(['es_AR'])
-            env.cr.commit()
+        Migration from v1.x or v2.x:
+        On upgrade, no scripts run. The previous module's effects on
+        user / partner lang data are preserved as-is. The new patch
+        replaces the previous override and monkey-patches.
     """,
     'author': 'Aries Consulting',
     'website': 'https://github.com/Aries-Consulting/odoo-bootstraps',
